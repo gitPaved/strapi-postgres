@@ -16,7 +16,7 @@ services:
       - ./yarn.lock:/opt/app/yarn.lock
       - ./.env.prod:/opt/app/.env
       - ./public/uploads:/opt/app/public/uploads
-      - ./dump.sql:/opt/app/dump.sql
+      - ./dump_check.sql:/opt/app/dump_check.sql
     ports:
       - "1337:1337"
     depends_on:
