@@ -32,7 +32,7 @@ COPY . .
 RUN rm -rf node_modules/esbuild/bin/* && npm run build
 
 # 🧹 Nettoyage : optionnel mais recommandé (ça réduit un peu l'image)
-RUN npm prune --production
+#RUN npm prune --production
 
 ### 🏁 Étape 2 : Image finale plus légère
 FROM node:22-alpine
