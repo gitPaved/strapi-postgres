@@ -1,0 +1,54 @@
+### 🏗 Étape 1 : Construction de l’application
+FROM node:22-alpine AS build
+
+# Installer les dépendances nécessaires à la compilation (sharp, esbuild, etc.)
+RUN apk update && apk add --no-cache \
+  build-base \
+  python3 \
+  bash \
+  vips-dev \
+  git \
+  autoconf \
+  automake \
+  libpng-dev \
+  zlib-dev \
+  nasm \
+  libtool \
+  make \
+  g++
+
+WORKDIR /opt/app
+
+# Copier les fichiers de dépendances
+COPY package*.json ./
+
+# Installer les dépendances de production
+RUN npm install --production
+
+# Copier tout le reste
+COPY . .
+
+# Supprimer les binaires esbuild et compiler l'application
+RUN rm -rf node_modules/esbuild/bin/* && npm run build
+
+# 🧹 Nettoyage : optionnel mais recommandé (ça réduit un peu l'image)
+RUN npm prune --production
+
+### 🏁 Étape 2 : Image finale plus légère
+FROM node:22-alpine
+
+# Installer uniquement les libs nécessaires à Strapi en runtime
+RUN apk add --no-cache vips-dev
+
+WORKDIR /opt/app
+
+# Copier le build et les dépendances depuis l’image de build
+COPY --from=build /opt/app ./
+
+# Donner les permissions à l’utilisateur "node"
+RUN chown -R node:node /opt/app
+USER node
+
+EXPOSE 1337
+
+CMD ["npm", "run", "start"]
